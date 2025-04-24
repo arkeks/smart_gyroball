@@ -1,0 +1,31 @@
+dependencies:
+  esp_lcd_gc9a01:
+    dependencies:
+    - name: idf
+      version: '>=4.4'
+    - name: espressif/cmake_utilities
+      version: 0.*
+    source:
+      path: /home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01
+      type: local
+    version: 2.0.2
+  espressif/cmake_utilities:
+    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 0.5.3
+  idf:
+    source:
+      type: idf
+    version: 5.4.1
+direct_dependencies:
+- esp_lcd_gc9a01
+- idf
+manifest_hash: 5d25b097fa849349f13c045d47f0a46e6365d64a07865e5be8c6ae49e5a2dbfb
+target: esp32
+version: 2.0.0

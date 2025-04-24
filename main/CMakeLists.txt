@@ -1,0 +1,8 @@
+idf_component_register(SRCS "main.c"
+                    INCLUDE_DIRS "."
+                    REQUIRES esp_timer
+                    REQUIRES esp_driver_gpio
+                    REQUIRES lvgl
+                    REQUIRES esp_lcd_gc9a01
+                    REQUIRES esp_lvgl_port
+                    REQUIRES img)
