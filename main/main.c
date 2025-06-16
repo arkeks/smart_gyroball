@@ -5,23 +5,21 @@
 #include "esp_heap_caps.h"
 #include "esp_lvgl_port.h"
 
+#include "driver/gpio.h"
+
+// lvgl global vars
 static lv_display_t *display_obj;
 static esp_lcd_panel_handle_t lcd_panel_handle;
 static esp_lcd_panel_io_handle_t io_handle;
 lv_obj_t *screen;
-LV_IMAGE_DECLARE(clown);
+LV_IMAGE_DECLARE(circle);
+LV_FONT_DECLARE(Sakana);
+static lv_obj_t * speed_label;
+static char velocity_str[15];
 
-// void lv_example_get_started_1(void)
-// {
-//     /*Change the active screen's background color*/
-//     lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0xff0000), LV_PART_MAIN);
+// hall sensor global var
+static uint32_t hall_counter;
 
-//     /*Create a white label, set its text and align it to the center*/
-//     lv_obj_t * label = lv_label_create(lv_screen_active());
-//     lv_label_set_text(label, "Hello world");
-//     lv_obj_set_style_text_color(lv_screen_active(), lv_color_hex(0xffffff), LV_PART_MAIN);
-//     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-// }
 void app_lcd_init(void)
 {
     //-----------------PHYSICAL LCD INIT-------------------
@@ -81,7 +79,7 @@ void app_lvgl_init(void)
         },
         .flags = {
             .buff_dma = true,
-            .swap_bytes = true,
+            .swap_bytes = true, // needed for correct pixel values order for this panel
             .full_refresh = false,
             .direct_mode = true, // TODO: try full refresh and partial
         }
@@ -94,20 +92,83 @@ void app_lvgl_init(void)
     screen = lv_scr_act();
 }
 
+static void gpio_isr_handler(void* arg)
+{
+    hall_counter++;
+}
+
+void app_gpio_hall_sensor_init(void)
+{
+    gpio_config_t io_conf = {};
+
+    // interrupt of rising edge
+    io_conf.intr_type = GPIO_INTR_NEGEDGE;
+
+    // bit mask of the pin
+    io_conf.pin_bit_mask = (1ULL << 13);
+
+    // set as input mode
+    io_conf.mode = GPIO_MODE_INPUT;
+
+    // enable pull-up mode
+    // io_conf.pull_down_en = 1;
+
+    gpio_config(&io_conf);
+
+    // install gpio isr service
+    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL3);
+
+    // hook isr handler for specific gpio pin
+    gpio_isr_handler_add(GPIO_NUM_13, gpio_isr_handler, (void*) GPIO_NUM_13);
+
+    gpio_dump_io_configuration(stdout, (1ULL << 13));
+
+    hall_counter = 0;
+}
+
+void velocity_show(lv_timer_t * timer)
+{
+    // update velocity
+    // TODO: find out how to use \n so that everything stays centered
+    sprintf(velocity_str, "%ld RPM", (hall_counter*60));
+    lv_label_set_text_static(speed_label, velocity_str);
+    lv_obj_set_style_text_color(lv_screen_active(), lv_color_hex(0x9027ff), LV_PART_MAIN); // doesn't work without it (why?)
+    
+    // reset counter
+    hall_counter = 0;
+}
+
+void background_init()
+{
+    /* Create image */
+    lv_obj_t *test_img = lv_img_create(screen);
+    lv_img_set_src(test_img, &circle);
+    lv_obj_align(test_img, LV_ALIGN_CENTER, 0, 0);
+}
+
+void label_init()
+{
+    sprintf(velocity_str, "%ld RPM", (hall_counter));
+    speed_label = lv_label_create(lv_screen_active());
+    lv_label_set_text(speed_label, velocity_str);
+    lv_obj_set_style_text_font(speed_label, &Sakana, LV_PART_MAIN);
+    lv_obj_set_style_text_color(lv_screen_active(), lv_color_hex(0x9027ff), LV_PART_MAIN);
+    lv_obj_align(speed_label, LV_ALIGN_CENTER, 0, 0);
+}
+
 void app_main(void)
 {
     app_lcd_init();
     app_lvgl_init();
 
-    /* Create image */
-    lv_obj_t *test_img = lv_img_create(screen);
-    lv_img_set_src(test_img, &clown);
-    lv_obj_align(test_img, LV_ALIGN_CENTER, 0, 0);
+    app_gpio_hall_sensor_init();
+    background_init();
+    label_init();
 
-    // lv_example_get_started_1();
+    lv_timer_t * timer = lv_timer_create(velocity_show, 1000, &hall_counter);
 
-    // lvgl_port_lock(0);
-    // display_obj = lv_display_create(LCD_WIDTH_RES, LCD_HEIGHT_RES);
-    // lv_display_set_buffers(display_obj, render_buf, NULL, sizeof(render_buf), LV_DISPLAY_RENDER_MODE_DIRECT);
-    // lv_display_set_flush_cb(display_obj, my_flush_cb);
+    while(1)
+    {
+        vTaskDelay(30);
+    };
 }

@@ -5,4 +5,5 @@ idf_component_register(SRCS "main.c"
                     REQUIRES lvgl
                     REQUIRES esp_lcd_gc9a01
                     REQUIRES esp_lvgl_port
-                    REQUIRES img)
+                    REQUIRES img
+                    REQUIRES fonts)

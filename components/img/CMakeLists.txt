@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "clown.c"
+    SRCS "circle.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )
