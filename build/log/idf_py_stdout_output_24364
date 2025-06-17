@@ -1,0 +1,28 @@
+[1/9] Performing build step for 'bootloader'
+[1/1] cd /home/seradya/Documents/Programming/smart_gyroball/build/bootloader/esp-idf/esptool_py && /home/seradya/.espressif/python_env/idf5.5_py3.11_env/bin/python /home/seradya/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/seradya/Documents/Programming/smart_gyroball/build/bootloader/bootloader.bin
+Bootloader binary size 0x54c0 bytes. 0x2b40 bytes (34%) free.
+[2/9] No install step for 'bootloader'
+[3/9] Completed 'bootloader'
+[4/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj
+/home/seradya/Documents/Programming/smart_gyroball/main/app_main.c: In function 'mqtt_app_start':
+/home/seradya/Documents/Programming/smart_gyroball/main/app_main.c:336:10: warning: unused variable 'str' [-Wunused-variable]
+  336 |     char str[10];
+      |          ^~~
+/home/seradya/Documents/Programming/smart_gyroball/main/app_main.c:335:14: warning: unused variable 'rpm' [-Wunused-variable]
+  335 |     uint32_t rpm = 0;
+      |              ^~~
+[5/9] Linking C static library esp-idf/main/libmain.a
+[6/9] Generating ld/sections.ld
+[7/9] Linking CXX executable Lab4_1.elf
+[8/9] Generating binary image from built executable
+esptool.py v4.8.1
+Creating esp32c6 image...
+Merged 1 ELF section
+Successfully created esp32c6 image.
+Generated /home/seradya/Documents/Programming/smart_gyroball/build/Lab4_1.bin
+[9/9] cd /home/seradya/Documents/Programming/smart_gyroball/build/esp-idf/esptool_py && /home/seradya/.espressif/python_env/idf5.5_py3.11_env/bin/python /home/seradya/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/seradya/Documents/Programming/smart_gyroball/build/partition_table/partition-table.bin /home/seradya/Documents/Programming/smart_gyroball/build/Lab4_1.bin
+FAILED: esp-idf/esptool_py/CMakeFiles/app_check_size /home/seradya/Documents/Programming/smart_gyroball/build/esp-idf/esptool_py/CMakeFiles/app_check_size 
+cd /home/seradya/Documents/Programming/smart_gyroball/build/esp-idf/esptool_py && /home/seradya/.espressif/python_env/idf5.5_py3.11_env/bin/python /home/seradya/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/seradya/Documents/Programming/smart_gyroball/build/partition_table/partition-table.bin /home/seradya/Documents/Programming/smart_gyroball/build/Lab4_1.bin
+Error: app partition is too small for binary Lab4_1.bin size 0x116160:
+  - Part 'factory' 0/0 @ 0x10000 size 0x100000 (overflow 0x16160)
+ninja: build stopped: subcommand failed.

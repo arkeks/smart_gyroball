@@ -1,0 +1,78 @@
+[1/5] cd /home/seradya/Documents/Programming/smart_gyroball/build/esp-idf/esptool_py && /home/seradya/.espressif/python_env/idf5.5_py3.11_env/bin/python /home/seradya/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/seradya/Documents/Programming/smart_gyroball/build/partition_table/partition-table.bin /home/seradya/Documents/Programming/smart_gyroball/build/Lab4_1.bin
+Lab4_1.bin binary size 0x116160 bytes. Smallest app partition is 0x177000 bytes. 0x60ea0 bytes (26%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /home/seradya/Documents/Programming/smart_gyroball/build/bootloader/esp-idf/esptool_py && /home/seradya/.espressif/python_env/idf5.5_py3.11_env/bin/python /home/seradya/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/seradya/Documents/Programming/smart_gyroball/build/bootloader/bootloader.bin
+Bootloader binary size 0x54c0 bytes. 0x2b40 bytes (34%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] cd /home/seradya/esp/esp-idf/components/esptool_py && /usr/bin/cmake -D IDF_PATH=/home/seradya/esp/esp-idf -D "SERIAL_TOOL=/home/seradya/.espressif/python_env/idf5.5_py3.11_env/bin/python;;/home/seradya/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32c6" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/seradya/Documents/Programming/smart_gyroball/build -P /home/seradya/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32c6 -p /dev/ttyACM0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 Lab4_1.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.8.1
+Serial port /dev/ttyACM0
+Connecting...
+Chip is ESP32-C6FH4 (QFN32) (revision v0.1)
+Features: WiFi 6, BT 5, IEEE802.15.4
+Crystal is 40MHz
+MAC: 54:32:04:ff:fe:29:53:44
+BASE MAC: 54:32:04:29:53:44
+MAC_EXT: ff:fe
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00005fff...
+Flash will be erased from 0x00010000 to 0x00126fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+SHA digest in image updated
+Compressed 21696 bytes to 13446...
+Writing at 0x00000000... (100 %)
+Wrote 21696 bytes (13446 compressed) at 0x00000000 in 0.3 seconds (effective 539.1 kbit/s)...
+Hash of data verified.
+Compressed 1139040 bytes to 583819...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001d625... (5 %)
+Writing at 0x000287f8... (8 %)
+Writing at 0x00031b23... (11 %)
+Writing at 0x0003a831... (13 %)
+Writing at 0x00041b91... (16 %)
+Writing at 0x00049631... (19 %)
+Writing at 0x00050cf5... (22 %)
+Writing at 0x0005824d... (25 %)
+Writing at 0x0005f34e... (27 %)
+Writing at 0x00065867... (30 %)
+Writing at 0x0006c03a... (33 %)
+Writing at 0x00072f4f... (36 %)
+Writing at 0x00079441... (38 %)
+Writing at 0x0007fab8... (41 %)
+Writing at 0x00085ab8... (44 %)
+Writing at 0x0008b86a... (47 %)
+Writing at 0x000918ea... (50 %)
+Writing at 0x00097c43... (52 %)
+Writing at 0x0009e44a... (55 %)
+Writing at 0x000a416f... (58 %)
+Writing at 0x000aa122... (61 %)
+Writing at 0x000b0384... (63 %)
+Writing at 0x000b6783... (66 %)
+Writing at 0x000bd4e2... (69 %)
+Writing at 0x000c47d4... (72 %)
+Writing at 0x000cb72c... (75 %)
+Writing at 0x000d22c1... (77 %)
+Writing at 0x000d8490... (80 %)
+Writing at 0x000de87b... (83 %)
+Writing at 0x000e4c10... (86 %)
+Writing at 0x000eae94... (88 %)
+Writing at 0x000f1a45... (91 %)
+Writing at 0x000f8af2... (94 %)
+Writing at 0x000fe5e1... (97 %)
+Writing at 0x00104594... (100 %)
+Wrote 1139040 bytes (583819 compressed) at 0x00010000 in 8.1 seconds (effective 1123.9 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.0 seconds (effective 588.1 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
