@@ -2,8 +2,21 @@ import paho.mqtt.client as mqtt
 import time
 import random
 import math
+import socket
 
-BROKER = "localhost"
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "localhost"
+
+
+BROKER = get_local_ip()
 PORT = 1883
 TOPIC = "speed/values"
 
@@ -28,7 +41,7 @@ try:
         dt = current_time - last_update
         last_update = current_time
 
-        if random.random() < 0.02:  
+        if random.random() < 0.02:
             target_speed = random.uniform(0, 100)
 
         speed_diff = target_speed - current_speed

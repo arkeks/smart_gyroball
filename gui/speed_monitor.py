@@ -1,5 +1,6 @@
 import sys
 import time
+import socket
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                                QPushButton, QLabel, QHBoxLayout)
 from PySide6.QtCore import Qt, QTimer, Signal, Slot
@@ -8,15 +9,26 @@ from PySide6.QtGui import QPainter
 import paho.mqtt.client as mqtt
 
 
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "localhost"
+
+
 class SpeedMonitor(QMainWindow):
-    new_data = Signal(float, float)  
+    new_data = Signal(float, float)
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Gyroball Speed Monitor")
         self.setMinimumSize(800, 600)
 
-        self.broker = "localhost"
+        self.broker = get_local_ip()
         self.port = 1883
         self.topic = "speed/values"
 
@@ -48,13 +60,11 @@ class SpeedMonitor(QMainWindow):
             "font-size: 20px; font-weight: bold; color: orange;")
         layout.addWidget(self.status_label)
 
-        
         self.speed_label = QLabel("Speed: 0.00")
         self.speed_label.setAlignment(Qt.AlignCenter)
         self.speed_label.setStyleSheet("font-size: 48px; font-weight: bold;")
         layout.addWidget(self.speed_label)
 
-    
         self.avg_label = QLabel("Average: 0.00")
         self.avg_label.setAlignment(Qt.AlignCenter)
         self.avg_label.setStyleSheet("font-size: 28px; font-weight: bold;")
@@ -117,7 +127,7 @@ class SpeedMonitor(QMainWindow):
         self.times.append(current_time)
         print(
             f"Добавлена точка: t={current_time:.3f}, speed={speed:.2f}, всего точек: {len(self.speeds)}")
-        self.update_display()  
+        self.update_display()
 
     def update_display(self):
         if not self.is_recording or not self.times:
@@ -139,7 +149,7 @@ class SpeedMonitor(QMainWindow):
             else:
                 left = 0
                 right = current_time
-                
+
             for t, s in zip(self.times, self.speeds):
                 if left <= t <= right:
                     self.series.append(t, s)
@@ -162,8 +172,8 @@ class SpeedMonitor(QMainWindow):
         self.speeds.clear()
         self.times.clear()
         self.series.clear()
-        self.axis_x.setRange(0, 10)  
-        self.axis_y.setRange(0, 100)  
+        self.axis_x.setRange(0, 10)
+        self.axis_y.setRange(0, 100)
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
 
