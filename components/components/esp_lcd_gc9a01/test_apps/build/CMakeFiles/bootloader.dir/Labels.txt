@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/CMakeFiles/bootloader
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/CMakeFiles/bootloader.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/CMakeFiles/bootloader-complete.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/arkeks/projects/esp-bsp/components/lcd/esp_lcd_gc9a01/test_apps/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

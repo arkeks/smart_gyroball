@@ -34,11 +34,6 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/home/seradya/.espressif/tools/riscv32-esp-elf/esp-14.2.0_20240906/riscv32-esp-elf/bin/riscv32-esp-elf-objdump")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
-  include("/home/seradya/Documents/Programming/smart_gyroball/build/bootloader/esp-idf/esp_system/openocd_stub_bins/cmake_install.cmake")
+  set(CMAKE_OBJDUMP "/home/seradya/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-objdump")
 endif()
 

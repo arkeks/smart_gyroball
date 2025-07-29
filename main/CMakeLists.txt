@@ -1,2 +1,17 @@
+cmake_minimum_required(VERSION 3.28)
 idf_component_register(SRCS "app_main.c"
-                    INCLUDE_DIRS ".")
+                    INCLUDE_DIRS "."
+                    REQUIRES esp_timer
+                    REQUIRES esp_driver_gpio
+                    REQUIRES lvgl
+                    REQUIRES esp_lcd_gc9a01
+                    REQUIRES esp_lvgl_port
+                    REQUIRES img
+                    REQUIRES fonts
+                    REQUIRES esp_event
+                    REQUIRES esp_netif
+                    REQUIRES mqtt
+                    REQUIRES nvs_flash
+                    REQUIRES esp_wifi
+                    REQUIRES esp_netif
+                    REQUIRES esp_common)
