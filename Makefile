@@ -27,4 +27,16 @@ run-subscriber:
 run-gui:
 	$(VENV_BIN)/python gui/speed_monitor.py
 
+run-settings:
+	$(VENV_BIN)/python gui/weight_settings.py
+
+test-calories:
+	$(VENV_BIN)/python test_calories.py
+
+test-advanced-calories:
+	$(VENV_BIN)/python test_advanced_calories.py
+
+run-auth:
+	$(VENV_BIN)/python gui/user_auth.py
+
 run-all: run-subscriber run-publisher 

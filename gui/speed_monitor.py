@@ -30,7 +30,7 @@ class SpeedMonitor(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Gyroball Speed Monitor")
+        self.setWindowTitle("Smart Gyroball - Speed Monitor")
         self.setMinimumSize(800, 600)
 
         self.broker = get_local_ip()
@@ -42,8 +42,44 @@ class SpeedMonitor(QMainWindow):
         self.start_time = None
         self.is_recording = False
 
+        # Параметры пользователя для расчета калорий
+        self.current_user = None
+        self.weight = 70.0
+        self.height = 170.0
+        self.age = 25
+        self.gender = "Мужской"
+        self.calories_per_minute = 0.0
+        self.total_calories = 0.0
+
         self.connection_status = False
 
+        # Сначала показываем окно авторизации
+        self.show_auth_window()
+
+    def show_auth_window(self):
+        """Показывает окно авторизации"""
+        try:
+            from user_auth import UserAuth
+            self.auth_window = UserAuth()
+            self.auth_window.user_logged_in.connect(self.on_user_logged_in)
+            self.auth_window.show()
+        except ImportError:
+            print("Auth window not available, using default settings")
+            self.initialize_app()
+
+    def on_user_logged_in(self, user_data):
+        """Обработчик успешной авторизации пользователя"""
+        self.current_user = user_data
+        self.weight = user_data['weight']
+        # значение по умолчанию для старых пользователей
+        self.height = user_data.get('height', 170.0)
+        self.age = user_data['age']
+        self.gender = user_data['gender']
+
+        self.initialize_app()
+
+    def initialize_app(self):
+        """Инициализирует приложение после авторизации"""
         self.setup_ui()
         self.load_last_measurement()
 
@@ -55,10 +91,91 @@ class SpeedMonitor(QMainWindow):
 
         self.new_data.connect(self.add_data)
 
+        # Показываем главное окно
+        self.show()
+
+    def calculate_calories(self, speed, duration_minutes):
+        """
+        Расчет калорий на основе скорости вращения гиробола с учетом пола и возраста
+        Используется улучшенная формула с учетом базового метаболизма
+        """
+        # Определяем MET на основе скорости
+        if speed < 30:
+            met = 2.0  # легкая нагрузка
+        elif speed < 70:
+            met = 4.0  # умеренная нагрузка
+        else:
+            met = 6.0  # интенсивная нагрузка
+
+        # Конвертируем время в часы
+        duration_hours = duration_minutes / 60.0
+
+        # Рассчитываем базовый метаболизм (BMR) по формуле Миффлина-Сан Жеора
+        if self.gender == "Мужской":
+            bmr = 10 * self.weight + 6.25 * self.height - 5 * self.age + 5
+        else:
+            bmr = 10 * self.weight + 6.25 * self.height - 5 * self.age - 161
+
+        # Рассчитываем калории с учетом базового метаболизма и активности
+        # Формула: Калории = (BMR * MET * время_в_часах) / 24
+        calories = (bmr * met * duration_hours) / 24
+
+        return calories
+
+    def open_settings(self):
+        """Открывает окно настроек веса"""
+        try:
+            from weight_settings import WeightSettings
+            self.settings_window = WeightSettings()
+            self.settings_window.show()
+            # Обновляем вес после закрытия окна настроек
+            self.settings_window.destroyed.connect(
+                self.update_weight_from_settings)
+        except ImportError:
+            print("Settings window not available")
+
+    def update_weight_from_settings(self):
+        """Обновляет вес из настроек"""
+        if self.current_user:
+            # Обновляем данные пользователя
+            try:
+                import json
+                with open('users.json', 'r', encoding='utf-8') as f:
+                    users = json.load(f)
+                if self.current_user['username'] in users:
+                    self.weight = users[self.current_user['username']]['weight']
+                    self.height = users[self.current_user['username']].get(
+                        'height', 170.0)
+                    self.age = users[self.current_user['username']]['age']
+                    self.gender = users[self.current_user['username']]['gender']
+                    self.current_user = users[self.current_user['username']]
+                    # Обновляем информацию о пользователе в интерфейсе
+                    user_info = f"Пользователь: {self.current_user['name']} | Вес: {self.weight}кг | Рост: {self.height}см | Возраст: {self.age} | Пол: {self.gender}"
+                    self.user_info_label.setText(user_info)
+            except Exception as e:
+                print(f"Error updating user settings: {e}")
+
+    def logout_user(self):
+        """Смена пользователя"""
+        self.hide()
+        self.show_auth_window()
+
     def setup_ui(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
+
+        # Информация о пользователе
+        if self.current_user:
+            user_info = f"Пользователь: {self.current_user['name']} | Вес: {self.weight}кг | Рост: {self.height}см | Возраст: {self.age} | Пол: {self.gender}"
+        else:
+            user_info = "Пользователь не авторизован"
+
+        self.user_info_label = QLabel(user_info)
+        self.user_info_label.setAlignment(Qt.AlignCenter)
+        self.user_info_label.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: #2E86AB; margin: 5px;")
+        layout.addWidget(self.user_info_label)
 
         self.status_label = QLabel("Connecting to MQTT...")
         self.status_label.setAlignment(Qt.AlignCenter)
@@ -66,15 +183,40 @@ class SpeedMonitor(QMainWindow):
             "font-size: 20px; font-weight: bold; color: orange;")
         layout.addWidget(self.status_label)
 
+        # Создаем горизонтальный layout для скорости и калорий
+        metrics_layout = QHBoxLayout()
+
+        # Левая колонка - скорость
+        speed_layout = QVBoxLayout()
         self.speed_label = QLabel("Speed: 0.00")
         self.speed_label.setAlignment(Qt.AlignCenter)
         self.speed_label.setStyleSheet("font-size: 48px; font-weight: bold;")
-        layout.addWidget(self.speed_label)
+        speed_layout.addWidget(self.speed_label)
 
         self.avg_label = QLabel("Average: 0.00")
         self.avg_label.setAlignment(Qt.AlignCenter)
         self.avg_label.setStyleSheet("font-size: 28px; font-weight: bold;")
-        layout.addWidget(self.avg_label)
+        speed_layout.addWidget(self.avg_label)
+
+        metrics_layout.addLayout(speed_layout)
+
+        # Правая колонка - калории
+        calories_layout = QVBoxLayout()
+        self.calories_label = QLabel("Calories: 0.0")
+        self.calories_label.setAlignment(Qt.AlignCenter)
+        self.calories_label.setStyleSheet(
+            "font-size: 48px; font-weight: bold; color: #FF6B35;")
+        calories_layout.addWidget(self.calories_label)
+
+        self.calories_per_min_label = QLabel("Cal/min: 0.0")
+        self.calories_per_min_label.setAlignment(Qt.AlignCenter)
+        self.calories_per_min_label.setStyleSheet(
+            "font-size: 28px; font-weight: bold; color: #FF6B35;")
+        calories_layout.addWidget(self.calories_per_min_label)
+
+        metrics_layout.addLayout(calories_layout)
+
+        layout.addLayout(metrics_layout)
 
         button_layout = QHBoxLayout()
         self.start_button = QPushButton("Start")
@@ -92,6 +234,17 @@ class SpeedMonitor(QMainWindow):
         self.stats_button.clicked.connect(self.toggle_view)
         self.stats_button.setStyleSheet("font-size: 18px; padding: 10px;")
         button_layout.addWidget(self.stats_button)
+
+        self.settings_button = QPushButton("Settings")
+        self.settings_button.clicked.connect(self.open_settings)
+        self.settings_button.setStyleSheet("font-size: 18px; padding: 10px;")
+        button_layout.addWidget(self.settings_button)
+
+        self.logout_button = QPushButton("Сменить пользователя")
+        self.logout_button.clicked.connect(self.logout_user)
+        self.logout_button.setStyleSheet(
+            "font-size: 18px; padding: 10px; background-color: #A23B72; color: white;")
+        button_layout.addWidget(self.logout_button)
 
         layout.addLayout(button_layout)
 
@@ -136,9 +289,9 @@ class SpeedMonitor(QMainWindow):
         stats_layout.addWidget(stats_label)
 
         self.stats_table = QTableWidget()
-        self.stats_table.setColumnCount(4)
+        self.stats_table.setColumnCount(8)
         self.stats_table.setHorizontalHeaderLabels(
-            ["Date", "Duration", "Max Speed", "Average Speed"])
+            ["Date", "User", "Duration", "Max Speed", "Average Speed", "Calories", "Cal/min", "Weight"])
         self.stats_table.horizontalHeader().setStretchLastSection(True)
         stats_layout.addWidget(self.stats_table)
 
@@ -236,6 +389,17 @@ class SpeedMonitor(QMainWindow):
             avg_speed = sum(self.speeds) / len(self.speeds)
             self.avg_label.setText(f"Average: {avg_speed:.2f}")
 
+            # Обновляем калории
+            duration_minutes = self.times[-1] / 60.0
+            self.total_calories = self.calculate_calories(
+                avg_speed, duration_minutes)
+            self.calories_per_minute = self.calculate_calories(
+                avg_speed, 1.0)  # калории за минуту
+
+            self.calories_label.setText(f"Calories: {self.total_calories:.1f}")
+            self.calories_per_min_label.setText(
+                f"Cal/min: {self.calories_per_minute:.1f}")
+
         if len(self.times) > 1:
             self.series.clear()
             window_size = self.times[-1]
@@ -271,6 +435,10 @@ class SpeedMonitor(QMainWindow):
         self.series.clear()
         self.axis_x.setRange(0, 10)
         self.axis_y.setRange(0, 100)
+        self.total_calories = 0.0
+        self.calories_per_minute = 0.0
+        self.calories_label.setText("Calories: 0.0")
+        self.calories_per_min_label.setText("Cal/min: 0.0")
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
 
@@ -282,11 +450,25 @@ class SpeedMonitor(QMainWindow):
             avg_speed = sum(self.speeds) / \
                 len(self.speeds) if self.speeds else 0
 
+            # Рассчитываем финальные калории
+            duration_minutes = duration / 60.0
+            total_calories = self.calculate_calories(
+                avg_speed, duration_minutes)
+            calories_per_minute = self.calculate_calories(avg_speed, 1.0)
+
             stats = {
                 'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'duration': duration,
                 'max_speed': max_speed,
-                'avg_speed': avg_speed
+                'avg_speed': avg_speed,
+                'calories': total_calories,
+                'calories_per_minute': calories_per_minute,
+                'user': self.current_user['username'] if self.current_user else 'unknown',
+                'user_name': self.current_user['name'] if self.current_user else 'Unknown',
+                'weight': self.weight,
+                'height': self.height,
+                'age': self.age,
+                'gender': self.gender
             }
 
             try:
@@ -325,7 +507,9 @@ class SpeedMonitor(QMainWindow):
         try:
             data = {
                 'speeds': self.speeds,
-                'times': self.times
+                'times': self.times,
+                'total_calories': self.total_calories,
+                'calories_per_minute': self.calories_per_minute
             }
             with open('last_measurement.json', 'w') as f:
                 json.dump(data, f, indent=4)
@@ -367,12 +551,32 @@ class SpeedMonitor(QMainWindow):
                 for i, record in enumerate(stats):
                     self.stats_table.setItem(
                         i, 0, QTableWidgetItem(record['date']))
-                    self.stats_table.setItem(i, 1, QTableWidgetItem(
-                        f"{record['duration']:.1f}s"))
+
+                    # Показываем пользователя
+                    user_name = record.get(
+                        'user_name', record.get('user', 'Unknown'))
+                    self.stats_table.setItem(i, 1, QTableWidgetItem(user_name))
+
                     self.stats_table.setItem(i, 2, QTableWidgetItem(
-                        f"{record['max_speed']:.2f}"))
+                        f"{record['duration']:.1f}s"))
                     self.stats_table.setItem(i, 3, QTableWidgetItem(
+                        f"{record['max_speed']:.2f}"))
+                    self.stats_table.setItem(i, 4, QTableWidgetItem(
                         f"{record['avg_speed']:.2f}"))
+
+                    # Добавляем колонки с калориями
+                    calories = record.get('calories', 0.0)
+                    calories_per_min = record.get('calories_per_minute', 0.0)
+
+                    self.stats_table.setItem(i, 5, QTableWidgetItem(
+                        f"{calories:.1f}"))
+                    self.stats_table.setItem(i, 6, QTableWidgetItem(
+                        f"{calories_per_min:.1f}"))
+
+                    # Показываем вес
+                    weight = record.get('weight', 0.0)
+                    self.stats_table.setItem(i, 7, QTableWidgetItem(
+                        f"{weight:.1f}кг"))
         except Exception as e:
             print(f"Error loading statistics: {e}")
 

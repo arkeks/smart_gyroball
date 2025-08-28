@@ -1,0 +1,35 @@
+{
+    "test_user": {
+        "username": "test_user",
+        "password_hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "name": "Тестовый пользователь",
+        "weight": 75.0,
+        "height": 175.0,
+        "age": 28,
+        "gender": "Мужской",
+        "created_at": "2024-01-01T12:00:00",
+        "last_login": "2025-08-28T19:54:20.798058"
+    },
+    "anton": {
+        "username": "anton",
+        "password_hash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+        "name": "Антон",
+        "weight": 90.0,
+        "height": 180.0,
+        "age": 23,
+        "gender": "Мужской",
+        "created_at": "2025-08-28T19:56:31.067292",
+        "last_login": "2025-08-28T20:26:06.617765"
+    },
+    "hui": {
+        "username": "hui",
+        "password_hash": "a7877a970f44a733e53af458a618824987373f0a48d0ef36539d7f6d0c6a504e",
+        "name": "Hui",
+        "weight": 300.0,
+        "height": 250.0,
+        "age": 120,
+        "gender": "Мужской",
+        "created_at": "2025-08-28T20:15:57.129955",
+        "last_login": "2025-08-28T20:16:09.563074"
+    }
+}
